@@ -1,0 +1,116 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) throws FileNotFoundException {
+        //Scanner sc = new Scanner(System.in);
+        Scanner sc = new Scanner(new File("C:\\Users\\Ivan\\Downloads\\C-tezky.txt"));
+
+        //zjistim kolik je problemu
+        int pocetProblemu = sc.nextInt();
+
+        //zjistim pocet barev a vypisu delku trasy
+        for (int i = 0; i < pocetProblemu; i++) {
+            int pocetBarev = sc.nextInt();
+            int [] polePonozek = barevnePonozky(pocetBarev, sc);
+            int delkaTrasy = delkaTrasy(pocetBarev, polePonozek);
+            System.out.println(delkaTrasy);
+        }
+    }
+
+    //metoda bude moci udelat pole s ponozkami
+    public static int [] barevnePonozky(int pocetBarev, Scanner sc) {
+        int [] polePonozek = new int[pocetBarev * 2];
+
+        for (int i = 0; i < pocetBarev * 2; i++) {
+            polePonozek[i] = sc.nextInt();
+        }
+        return polePonozek;
+    }
+
+    //metoda bude moci vypocitat delku trasy pro sber ponozek
+    public static int delkaTrasy(int pocetBarev, int [] polePonozek) {
+        int vzdalenost = 0;
+        int prvniBarvaParu = polePonozek[0];
+        int i = 1;
+        int momentalniVzdalenost = 0;
+        int kolikKratSelCyklus = 1;
+        boolean jeNula = true;
+
+        while (pocetBarev != 0) {
+            jeNula = true;
+            //kdyz nenachzim par
+            if (prvniBarvaParu != polePonozek[i]) {
+                i++;
+                momentalniVzdalenost++;
+            }
+            //kdyz najdu par
+            else {
+                momentalniVzdalenost++;
+                polePonozek[i] = 0;
+                i++;
+                //kdyz zbyva jen jeden par
+                if (pocetBarev == 1) {
+                    vzdalenost += momentalniVzdalenost;
+                    pocetBarev--;
+                }
+                else {
+                    //kdyz jsou ponozky vedle sebe
+                    if (momentalniVzdalenost == 1) {
+                        if (polePonozek[i] == 0) {
+                            while (jeNula) {
+                                momentalniVzdalenost++;
+                                i++;
+                                if (polePonozek[i] != 0) {
+                                    prvniBarvaParu = polePonozek[i];
+                                    momentalniVzdalenost++;
+                                    i++;
+                                    vzdalenost += momentalniVzdalenost;
+                                    momentalniVzdalenost = 0;
+                                    pocetBarev--;
+                                    jeNula = false;
+                                }
+                            }
+                        }
+                        else {
+                            vzdalenost += momentalniVzdalenost + 1;
+                            momentalniVzdalenost = 0;
+                            prvniBarvaParu = polePonozek[i];
+                            i++;
+                            pocetBarev--;
+                        }
+                    }
+                    else {
+                        i -= momentalniVzdalenost;
+                        //kdyz neni po prvni ponozce z minuleho paru 0
+                        if(polePonozek[i] != 0) {
+                            vzdalenost += momentalniVzdalenost + (momentalniVzdalenost - 1);
+                            momentalniVzdalenost = 0;
+                            prvniBarvaParu = polePonozek[i];
+                            pocetBarev--;
+                            i++;
+                        }
+                        //kdyz je po prvni ponozce z minuleho paru 0
+                        else {
+                            while (jeNula == true) {
+                                kolikKratSelCyklus++;
+                                i++;
+                                if (polePonozek[i] != 0) {
+                                    prvniBarvaParu = polePonozek[i];
+                                    i++;
+                                    vzdalenost += momentalniVzdalenost + Math.abs(momentalniVzdalenost - kolikKratSelCyklus);
+                                    momentalniVzdalenost = 0;
+                                    pocetBarev--;
+                                    jeNula = false;
+                                    kolikKratSelCyklus = 1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return vzdalenost;
+    }
+}
